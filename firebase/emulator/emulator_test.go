@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// These tests require running firebase emulators.
 func TestMain(m *testing.M) {
 	// Skip these tests if the environment variable is not set.
 	// This is more convenient than using build tags, since having a build tag in the file

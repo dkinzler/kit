@@ -94,7 +94,7 @@ func findInterfacesInPackage(pkg Package) ([]Interface, error) {
 			base := path.Base(pkg.PackagePath)
 			pname := f.Name.Name
 			if base != pname {
-				//log.Println("package direcotry name", base, "doesn't match package name declared in files", pname)
+				//log.Println("package directory name", base, "doesn't match package name declared in files", pname)
 			} else {
 				i, err := findInterfacesInFile(f, pkg.PackagePath)
 				if err != nil {

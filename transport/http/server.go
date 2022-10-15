@@ -109,6 +109,8 @@ func RunDefaultServer(handler http.Handler, logger log.Logger, config ServerConf
 		}
 	})
 
+	// TODO maybe don't terminate program here, but instead have another channel that we switch over?
+
 	// when shutdown is called ListenAndServe returns immediately with http.ErrServerClosed
 	// however, open connections might still be running, therefore we wait below (with the shutdown channel) until the shutdown is complete
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {

@@ -4,7 +4,8 @@ import (
 	"net/http"
 )
 
-// An http middleware that recovers and calls the provided onPanic function if the next http handler panics.
+// Http middleware that recovers and calls the provided onPanic function if the next http handler panics.
+// Status code 500 Internal Server Error is written to the response header.
 func PanicMiddleware(next http.Handler, onPanic func(e interface{})) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {

@@ -10,16 +10,16 @@ import (
 func TestValidUUIDsCreated(t *testing.T) {
 	a := assert.New(t)
 
-	//check that UUID has correct length
-	//a version 4 UUID should be 128 bit = 16 bytes = 32 characters in hex
-	//the UUID as a string is split into 5 parts separated by 4 "-" characters
-	//which yields a total of 36 characters
+	// Check that UUID has correct length.
+	// A version 4 UUID should be 128 bit = 16 bytes = 32 characters in hex long.
+	// The UUID as a string is split into 5 parts separated by 4 "-" characters
+	// which yields a total of 36 characters.
 	uuid, err := NewUUID()
 	a.Nil(err)
 	a.Len(uuid, 36)
 
-	//two calls should return different UUIDs
-	//... unless we are astronomically unlucky
+	// Two calls should return distinct UUIDs
+	// ... unless we are astronomically unlucky.
 	id1, err := NewUUID()
 	a.Nil(err)
 	id2, err := NewUUID()

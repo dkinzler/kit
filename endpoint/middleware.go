@@ -12,13 +12,13 @@ import (
 	"github.com/go-kit/log"
 )
 
-// Logs errors from the underlying business/service/component logic of the endpoint, if the result value implements the Responder interface.
-// Errors from endpoint code should be caught/logged with the transport level error handler (see e.g. the errorHandler option to github.com/go-kit/kit/transport/http.NewServer)
+// Logs errors contained in the endpoint response, if the response type implements the Responder interface.
+// Errors from endpoint code should be caught/logged with transport level error handlers (see e.g. the errorHandler option to github.com/go-kit/kit/transport/http.NewServer).
 func ErrorLoggingMiddleware(logger log.Logger) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
-		return func(ctx context.Context, request interface{}) (result interface{}, err error) {
+		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			defer func() {
-				resp, ok := result.(Responder)
+				resp, ok := response.(Responder)
 				if ok && resp.Error() != nil {
 					e, ok := resp.Error().(errors.Error)
 					if ok {
@@ -33,17 +33,20 @@ func ErrorLoggingMiddleware(logger log.Logger) endpoint.Middleware {
 	}
 }
 
-// Records the time it took to process the request.
+// Endpoint middleware that records to the given histrogram the time it takes the endpoint to process requests.
 func InstrumentRequestTimeMiddleware(duration metrics.Histogram) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (result interface{}, err error) {
 			defer func(begin time.Time) {
+				t := float64(time.Since(begin).Milliseconds())
+
 				resp, ok := result.(Responder)
 				if ok {
-					//if the result value implements Responder, label the obervation based on success, i.e. if the error returned was nil or not
-					duration.With("success", fmt.Sprint(resp.Error() == nil)).Observe(float64(time.Since(begin).Milliseconds()))
+					// If the result value implements Responder, label the observation based on success,
+					// i.e. if the error returned was nil or not.
+					duration.With("success", fmt.Sprint(resp.Error() == nil)).Observe(t)
 				} else {
-					duration.Observe(float64(time.Since(begin).Milliseconds()))
+					duration.Observe(t)
 				}
 			}(time.Now())
 			return next(ctx, request)
@@ -51,8 +54,9 @@ func InstrumentRequestTimeMiddleware(duration metrics.Histogram) endpoint.Middle
 	}
 }
 
-// Applies zero or more middlewares to an Endpoint.
-// Middlewares are applied in order, first middleware passed is applied first and therefore innermost, last middleware passed is outermost.
+// Applies zero or more middlewares to an endpoint.
+// Middlewares are applied in order, i.e. first middleware passed is applied first and therefore innermost,
+// last middleware passed is outermost.
 func ApplyMiddlewares(e endpoint.Endpoint, mws ...endpoint.Middleware) endpoint.Endpoint {
 	var result endpoint.Endpoint = e
 	for _, mw := range mws {

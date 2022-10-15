@@ -124,7 +124,7 @@ func (e EndpointSpecifications) httpDecodeFuncName() string {
 	return "decodeHttp" + gen.UppercaseFirst(e.Method.Name) + "Request"
 }
 
-// Specifcation to create a single endpoint for an inteface method.
+// Specification to create a single endpoint for an inteface method.
 type EndpointSpecification struct {
 	// name of this endpoint, defaults to the name of the method
 	Name string `json:"name"`

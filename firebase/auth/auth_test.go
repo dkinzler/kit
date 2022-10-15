@@ -131,7 +131,7 @@ func TestAuthCheckerWorksIfEmailVerificationRquired(t *testing.T) {
 
 func TestAuthCheckerReturnsErrorOnInvalidToken(t *testing.T) {
 	a := assert.New(t)
-	_, ac, err := initTest(t, true, nil)
+	_, ac, _ := initTest(t, true, nil)
 
 	//empty token should not be accepted
 	ctx, cancel := getContext()
@@ -160,7 +160,7 @@ func TestAuthCheckerReturnsErrorIfCustomClaimsNotValid(t *testing.T) {
 		return nil, stderrors.New("invalid claims")
 	}
 
-	ec, ac, err := initTest(t, true, validateClaimsFunc)
+	ec, ac, _ := initTest(t, true, validateClaimsFunc)
 
 	userId1, err := ec.CreateUser("test@test.de", "testpw1234", true)
 	a.Nil(err)
@@ -188,7 +188,7 @@ func TestAuthCheckerCustomClaimsAddedCorrectly(t *testing.T) {
 		return "these_are_custom_claims", nil
 	}
 
-	ec, ac, err := initTest(t, true, validateClaimsFunc)
+	ec, ac, _ := initTest(t, true, validateClaimsFunc)
 
 	userId1, err := ec.CreateUser("test@test.de", "testpw1234", true)
 	a.Nil(err)

@@ -57,7 +57,7 @@ func TestDecodeJSONBodyWorks(t *testing.T) {
 	}
 	a.Equal(expected, decoded)
 
-	//works with struct
+	// works with struct
 	req = httptest.NewRequest("POST", "https://example.com/foo", strings.NewReader(jsonContent))
 	var decodedStruct TestStruct
 	err = DecodeJSONBody(req, &decodedStruct)
@@ -78,7 +78,7 @@ func TestDecodeJSONBodyWorks(t *testing.T) {
 
 func TestDecodeJSONBodyReturnsErrorIfDecodingFails(t *testing.T) {
 	a := assert.New(t)
-	//invalid json, because a "," is missing in the third line
+	// invalid json, because a "," is missing in the third line
 	jsonContent := `{
 	    "hello" : "there",
 		"this" : "is"
@@ -123,13 +123,13 @@ func TestEncodeJSONBodyReturnsErrorCorrectly(t *testing.T) {
 	a := assert.New(t)
 
 	w := httptest.NewRecorder()
-	//json.Marshal does not support function values
+	// json.Marshal does not support function values
 	err := EncodeJSONBody(w, func() {})
 	a.NotNil(err)
 	a.True(errors.IsInternalError(err))
 }
 
-func TestDecodeURLParam(t *testing.T) {
+func TestDecodeURLParameter(t *testing.T) {
 	a := assert.New(t)
 
 	r := httptest.NewRequest("GET", "http://example.com/events/e-1234-5678", nil)
@@ -146,7 +146,7 @@ func TestDecodeURLParam(t *testing.T) {
 	a.Equal(expected, actual)
 }
 
-func TestDecodeURLParamReturnsErrorOnMissingParam(t *testing.T) {
+func TestDecodeURLParameterReturnsErrorOnMissingParam(t *testing.T) {
 	a := assert.New(t)
 
 	r := httptest.NewRequest("GET", "http://example.com/events", nil)
@@ -199,6 +199,11 @@ func TestEncodeErrorWorks(t *testing.T) {
 		},
 		{
 			E:            errors.New(nil, "test", errors.InvalidArgument),
+			ExpectedCode: http.StatusBadRequest,
+			ExpectedBody: nil,
+		},
+		{
+			E:            errors.New(nil, "test", errors.FailedPrecondition),
 			ExpectedCode: http.StatusBadRequest,
 			ExpectedBody: nil,
 		},
@@ -257,7 +262,7 @@ func TestGenericJSONEncodeFunc(t *testing.T) {
 	a := assert.New(t)
 
 	var x interface{}
-	//if response does not implement endpoint.Responder should return status InternalServerError
+	// if response does not implement endpoint.Responder should return status InternalServerError
 	w := httptest.NewRecorder()
 	x = map[string]interface{}{"test": "hello"}
 	err := MakeGenericJSONEncodeFunc(http.StatusOK)(context.Background(), w, x)
@@ -265,7 +270,7 @@ func TestGenericJSONEncodeFunc(t *testing.T) {
 	a.True(errors.IsInternalError(err))
 	a.Equal(http.StatusInternalServerError, w.Result().StatusCode)
 
-	//if response contains an error the respective status code should be set
+	// if response contains an error the respective status code should be set
 	w = httptest.NewRecorder()
 	x = endpoint.Response{
 		R:   nil,
@@ -275,7 +280,7 @@ func TestGenericJSONEncodeFunc(t *testing.T) {
 	a.Nil(err)
 	a.Equal(http.StatusBadRequest, w.Result().StatusCode)
 
-	//response does not contain err
+	// response does not contain err
 	w = httptest.NewRecorder()
 	expected := map[string]interface{}{
 		"test":      "sometestvalue",
@@ -317,7 +322,7 @@ func TestMaxRequestBodySizeHandler(t *testing.T) {
 	})
 	handler = NewMaxRequestBodySizeHandler(handler, 1000)
 
-	//this request body will be too large
+	// this request body will be too large
 	var longString string
 	for i := 0; i < 2000; i++ {
 		longString += "a"
@@ -331,7 +336,7 @@ func TestMaxRequestBodySizeHandler(t *testing.T) {
 	a.True(gotError)
 	a.Equal(http.StatusBadRequest, w.Result().StatusCode)
 
-	//request body < 1000 bytes, request should work
+	// request body < 1000 bytes, request should work
 	gotError = false
 	bodyBytes, err = json.Marshal(map[string]interface{}{"x": "this is not that long"})
 	a.Nil(err)

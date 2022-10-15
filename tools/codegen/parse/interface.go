@@ -28,7 +28,7 @@ type Method struct {
 	Comments []string
 }
 
-// Param represents a method paramter or return value
+// Param represents a method parameter or return value
 type Param struct {
 	// Name of the parameter, e.g. "ctx" for the parameter definition "ctx context.Context".
 	Name string

@@ -161,7 +161,7 @@ func (s *SimpleGenerator) GenFunctionParams(params []parse.Param) jen.Code {
 	return jen.Params(funcParams...)
 }
 
-// Returns a list of parameter names for the given paramter specification.
+// Returns a list of parameter names for the given parameter specification.
 // If a parameter specification contains a new, that name will be used, otherwise a name is generated
 // by using consecutive integers, i.e. "p_0", "p_1", "p_2".
 // The underscore in the generated param names is used to avoid any naming conflicts with existing code elements.

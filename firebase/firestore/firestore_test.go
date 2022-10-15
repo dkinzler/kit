@@ -76,6 +76,7 @@ func TestCreateAndGetDocumentWorks(t *testing.T) {
 	a := assert.New(t)
 
 	fs, err := initTest(t)
+	a.Nil(err)
 
 	col := fs.Collection("col1")
 	id := "doc-1234-5678"
@@ -96,6 +97,7 @@ func TestGetDocumentReturnsCorrectError(t *testing.T) {
 	a := assert.New(t)
 
 	fs, err := initTest(t)
+	a.Nil(err)
 
 	col := fs.Collection("col1")
 	id := "doc-1234-5678"
@@ -114,6 +116,7 @@ func TestDeleteDocumentWorks(t *testing.T) {
 	a := assert.New(t)
 
 	fs, err := initTest(t)
+	a.Nil(err)
 
 	col := fs.Collection("col1")
 	id := "doc-1234-5678"
@@ -138,6 +141,7 @@ func TestSetDocumentWorks(t *testing.T) {
 	a := assert.New(t)
 
 	fs, err := initTest(t)
+	a.Nil(err)
 
 	col := fs.Collection("col1")
 	id := "doc-1234-5678"
@@ -165,6 +169,7 @@ func TestUpdateDocumentWorks(t *testing.T) {
 	a := assert.New(t)
 
 	fs, err := initTest(t)
+	a.Nil(err)
 
 	col := fs.Collection("col1")
 	id := "doc-1234-5678"
@@ -192,6 +197,7 @@ func TestTransactionExpectations(t *testing.T) {
 	a := assert.New(t)
 
 	fs, err := initTest(t)
+	a.Nil(err)
 
 	col := fs.Collection("col1")
 	id := "doc-1234-5678"

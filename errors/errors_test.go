@@ -16,7 +16,7 @@ func TestErrorCode(t *testing.T) {
 
 	a.Equal("Unknown", Unknown.String())
 	a.Equal("InvalidArgument", InvalidArgument.String())
-	a.Equal("InvalidErrorCode", ErrorCode(42).String())
+	a.Equal("UndefinedErrorCode", ErrorCode(42).String())
 }
 
 func TestNew(t *testing.T) {
@@ -37,6 +37,70 @@ func TestNew(t *testing.T) {
 	a.Equal(err.WithPublicMessage("pmessage").PublicMessage, "pmessage")
 	a.Equal(err.WithInternalCode(43).InternalCode, 43)
 	a.Equal(err.WithInternalMessage("imessage").InternalMessage, "imessage")
+
+	err = err.With("testkey", 1001)
+	err = err.With("anotherkey", "value")
+	v, ok := err.KeyVals["testkey"]
+	a.True(ok)
+	a.Equal(1001, v)
+	v, ok = err.KeyVals["anotherkey"]
+	a.True(ok)
+	a.Equal("value", v)
+}
+
+func TestErrorString(t *testing.T) {
+	a := assert.New(t)
+
+	inner := stderrors.New("xyz")
+	err := New(inner, "testorigin", InvalidArgument).
+		WithInternalCode(42).
+		WithInternalMessage("internal message").
+		WithPublicCode(43).
+		WithPublicMessage("public message").
+		With("key", "value")
+
+	s := err.Error()
+	a.Contains(s, "origin: testorigin")
+	a.Contains(s, "code: InvalidArgument")
+	a.Contains(s, "internalCode: 42")
+	a.Contains(s, "internalMessage: internal message")
+	a.Contains(s, "publicCode: 43")
+	a.Contains(s, "publicMessage: public message")
+	a.Contains(s, "key: value")
+	a.Contains(s, "inner: ["+inner.Error()+"]")
+	a.Contains(s, "stackTrace:")
+}
+
+func TestErrorToMap(t *testing.T) {
+	a := assert.New(t)
+
+	inner := stderrors.New("xyz")
+	err := New(inner, "testorigin", InvalidArgument).
+		WithInternalCode(42).
+		WithInternalMessage("internal message").
+		WithPublicCode(43).
+		WithPublicMessage("public message").
+		With("key", "value")
+
+	m := err.ToMap()
+	a.Equal("testorigin", m["origin"])
+	a.Equal("InvalidArgument", m["code"])
+	a.Equal(42, m["internalCode"])
+	a.Equal("internal message", m["internalMessage"])
+	a.Equal(43, m["publicCode"])
+	a.Equal("public message", m["publicMessage"])
+	a.Equal("value", m["key"])
+	a.Equal(inner.Error(), m["inner"])
+	a.Contains(m, "stackTrace")
+
+	// inner error of type Error should also be encoded as map
+
+	inner = New(nil, "innerorigin", FailedPrecondition)
+	err = New(inner, "test", InvalidArgument)
+	m = err.ToMap()
+	a.Equal("test", m["origin"])
+	a.Equal("InvalidArgument", m["code"])
+	a.Equal(inner.(Error).ToMap(), m["inner"])
 }
 
 func TestIs(t *testing.T) {
@@ -153,7 +217,7 @@ func TestHasCode(t *testing.T) {
 }
 
 func TestUnstackErrors(t *testing.T) {
-	//we define these here, since multiple instances created with New(nil, "x", y) will not be equal because of the stack trace contained
+	// We define and reuse this error since multiple instances created with New(nil, "x", InvalidArgument) will not be equal because of the stack trace.
 	case1 := New(nil, "test", InvalidArgument)
 
 	e := New(New(New(stderrors.New("test"), "anotherone", 9001), "othertest", InvalidArgument), "test", InvalidArgument)

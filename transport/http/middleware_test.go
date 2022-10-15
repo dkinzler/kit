@@ -11,7 +11,7 @@ import (
 func TestPanicCaught(t *testing.T) {
 	a := assert.New(t)
 
-	//onPanic func should not be called if there is no panic
+	// onPanic func should not be called if there is no panic
 	handlerWithoutPanic := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
@@ -25,7 +25,7 @@ func TestPanicCaught(t *testing.T) {
 	a.False(called)
 	a.Equal(http.StatusOK, w.Result().StatusCode)
 
-	//onPanic called when handler panics
+	// onPanic called when handler panics
 	handlerWithPanic := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		panic("xyz")
 	})

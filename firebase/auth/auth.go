@@ -1,4 +1,4 @@
-// Package auth provides utilities to integrate Firebase Authentication with the Go kit framework.
+// Package auth implements functionality to verify tokens from Firebase Authentication.
 package auth
 
 import (
@@ -16,6 +16,7 @@ const ErrInvalidCustomClaims = 4
 
 const authCheckerErrOrigin = "authChecker"
 
+// User built from the data in a JWT token.
 type User struct {
 	Uid          string
 	CustomClaims interface{}
@@ -38,7 +39,7 @@ type authChecker struct {
 // Returns a new instance of AuthChecker.
 // If "requireVerifiedEmail" is true, the email of a user must be verified for a token to be considered valid.
 // Furthermore a function to validate and extract custom claims of a user can be provided. A token will only be considered valid if this function returns a nil error.
-// The first return value of the function is used to set the "CustomClaims" field of the User returned by the "IsAuthenticated" function.
+// The first return value of the function is used to set the "CustomClaims" field of the User value returned.
 func NewAuthChecker(authClient *auth.Client, requireVerifiedEmail bool, validateClaims ClaimsFunc) AuthChecker {
 	return &authChecker{
 		client:               authClient,
@@ -47,6 +48,9 @@ func NewAuthChecker(authClient *auth.Client, requireVerifiedEmail bool, validate
 	}
 }
 
+// Verifies that the given token is valid.
+// If true returns an instance of User that contains the user id and custom claims
+// of the Firebase Authentication user the token belongs to.
 func (ac *authChecker) IsAuthenticated(ctx context.Context, token string) (User, error) {
 	var user User
 	verifiedToken, err := ac.client.VerifyIDToken(ctx, token)

@@ -1,5 +1,5 @@
 // Package emulator provides helpers for working with firebase emulators, e.g. to populate them with data or reset them.
-// This package is intended to be mostly used in tests, since the emulators are for testing as well.
+// This is useful mostly for development and testing.
 package emulator
 
 import (
@@ -21,16 +21,20 @@ import (
 )
 
 // AuthEmulatorClient can be used to initialize and reset the firebase auth emulator for tests.
-// It provides functions to create uesrs, sign a user in and obtain a JWT token, and reset the emulator by deleting all accounts.
+// It provides functions to create users accounts, sign a user in and obtain a JWT token, and reset the emulator by deleting all accounts.
 type AuthEmulatorClient struct {
 	projectId string
-	//these are used to directly interact with the emulator over http
+	// These are used to directly interact with the emulator over http,
+	// since we cannot e.g. log a user in and get a JWT token with the Firebase Admin SDK packages.
 	emulatorAddress  string
 	emulatorBasePath string
-	//used to create users
+	// Used to create users.
 	fbAuthClient *auth.Client
 }
 
+// Creates a new AuthEmulatorClient.
+// The FIREBASE_PROJECT_ID and FIREBASE_AUTH_EMULATOR_HOST environment variables
+// must be set for this to work.
 func NewAuthEmulatorClient() (*AuthEmulatorClient, error) {
 	projectId := os.Getenv("FIREBASE_PROJECT_ID")
 	if projectId == "" {
@@ -64,8 +68,7 @@ func NewAuthEmulatorClient() (*AuthEmulatorClient, error) {
 	}, nil
 }
 
-// Create a new user in the emulator.
-// Returns the user id of the new user.
+// Create a new user in the emulator and return the user id.
 func (a *AuthEmulatorClient) CreateUser(email, password string, emailVerified bool) (string, error) {
 	user := (&auth.UserToCreate{}).
 		Email(email).
@@ -81,6 +84,8 @@ func (a *AuthEmulatorClient) CreateUser(email, password string, emailVerified bo
 	return ur.UID, nil
 }
 
+// Returns true if the given error returned by the CreateUser method was
+// due to an account with the email address already existing.
 func IsEmailAlreadyExistsError(err error) bool {
 	if inner := errors.Unwrap(err); inner != nil {
 		return auth.IsEmailAlreadyExists(inner)
@@ -88,7 +93,7 @@ func IsEmailAlreadyExistsError(err error) bool {
 	return auth.IsEmailAlreadyExists(err)
 }
 
-// Tries to obtain a JWT token from the emulator using the provided email and password.
+// Obtain a JWT token from the emulator using the provided email and password.
 func (a *AuthEmulatorClient) SignInUser(email, password string) (string, error) {
 	u := buildUrl(a.emulatorAddress, a.emulatorBasePath, "accounts:signInWithPassword", map[string]string{
 		"key": "fake-api-key",
@@ -110,7 +115,7 @@ func (a *AuthEmulatorClient) SignInUser(email, password string) (string, error) 
 		return "", fmt.Errorf("response has wrong status code: %v", resp.StatusCode)
 	}
 
-	//read JWT token from response
+	// read JWT token from response
 	var rb map[string]interface{}
 	err = decodeJSON(resp.Body, &rb)
 	if err != nil {
@@ -123,7 +128,7 @@ func (a *AuthEmulatorClient) SignInUser(email, password string) (string, error) 
 	return token, nil
 }
 
-// Reset firebase auth emulator by deleting all user accounts.
+// Reset emulator by deleting all user accounts.
 func (a *AuthEmulatorClient) ResetEmulator() error {
 	client := http.Client{}
 	req, err := http.NewRequest(
@@ -146,14 +151,17 @@ func (a *AuthEmulatorClient) ResetEmulator() error {
 }
 
 // FirestoreEmulatorClient can be used to reset the firestore emulator by deleting all data.
-// When testing, we usually want to reset the emulator after every test, so that data created by one cannot influence another.
+// When testing, we usually want to reset the emulator after every test, so that data created by one test cannot influence another.
 type FirestoreEmulatorClient struct {
 	projectId string
-	//these are used to directly interact with the emulator over http
+	// These are used to directly interact with the emulator over http.
 	emulatorAddress  string
 	emulatorBasePath string
 }
 
+// Creates a new FirestoreEmulatorClient.
+// The FIREBASE_PROJECT_ID and FIRESTORE_EMULATOR_HOST environment variables
+// must be set for this to work.
 func NewFirestoreEmulatorClient() (*FirestoreEmulatorClient, error) {
 	projectId := os.Getenv("FIREBASE_PROJECT_ID")
 	if projectId == "" {
@@ -172,6 +180,7 @@ func NewFirestoreEmulatorClient() (*FirestoreEmulatorClient, error) {
 	}, nil
 }
 
+// Reset the firestore emulator by deleting all collection and documents.
 func (e *FirestoreEmulatorClient) ResetEmulator() error {
 	client := http.Client{}
 	req, err := http.NewRequest(

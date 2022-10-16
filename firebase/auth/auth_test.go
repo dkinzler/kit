@@ -133,7 +133,7 @@ func TestAuthCheckerReturnsErrorOnInvalidToken(t *testing.T) {
 	a := assert.New(t)
 	_, ac, _ := initTest(t, true, nil)
 
-	//empty token should not be accepted
+	// Empty token should not be accepted
 	ctx, cancel := getContext()
 	defer cancel()
 	user1, err := ac.IsAuthenticated(ctx, "")

@@ -1,3 +1,4 @@
+// Package log implements convenience functionality on top of the Go kit logging package "github.com/go-kit/log".
 package log
 
 import (
@@ -10,9 +11,9 @@ import (
 	"github.com/go-kit/log/level"
 )
 
-// Logger wraps a "github.com/go-kit/log/Logger" to provide a more convenient way
+// Logger wraps a Logger from "github.com/go-kit/log" to provide a more convenient way
 // to log with a particular level.
-// Note that it implements the "github.com/go-kit/log/Logger" interface.
+// Note that it still implements the "github.com/go-kit/log/Logger" interface.
 type Logger struct {
 	l log.Logger
 }
@@ -21,26 +22,31 @@ func (l Logger) Log(keyvals ...interface{}) error {
 	return l.l.Log(keyvals...)
 }
 
+// Returns a logger that logs with level Debug.
 func (l Logger) Debug() Logger {
 	l.l = level.Debug(l.l)
 	return l
 }
 
+// Returns a logger that logs with level Info.
 func (l Logger) Info() Logger {
 	l.l = level.Info(l.l)
 	return l
 }
 
+// Returns a logger that logs with level Warn.
 func (l Logger) Warn() Logger {
 	l.l = level.Warn(l.l)
 	return l
 }
 
+// Returns a logger that logs with level Error.
 func (l Logger) Error() Logger {
 	l.l = level.Error(l.l)
 	return l
 }
 
+// Returns a logger that adds the given key-value pairs to every log message.
 func (l Logger) With(keyvals ...interface{}) Logger {
 	l.l = log.With(l.l, keyvals...)
 	return l
@@ -52,13 +58,15 @@ const AllowDebug Option = "allowDebug"
 const AllowInfo Option = "allowInfo"
 const AllowWarn Option = "allowWarn"
 const AllowError Option = "allowError"
+
+// Pretty print JSON log events, i.e. as multiple indented lines.
 const PrettyPrint Option = "prettyPrint"
 
 // Default logger that encodes log events as a single json object
-// and writes them to stdout. Utc timestamps and caller (file + line) are added to each log event.
+// and writes them to stdout.
 //
 // There are four different log levels: error/warn/info/debug (in descending order of severity).
-// Pass an option to filter out log messages below a certain level.
+// An option can be passed to filter out log messages below a certain level.
 // E.g. if AllowInfo is passed, only log messages with level info/warn/error or without a level will be logged.
 // By default only log messages with or above level info are logged.
 func DefaultJSONLogger(options ...Option) *Logger {
@@ -86,9 +94,9 @@ func DefaultJSONLogger(options ...Option) *Logger {
 
 	var logger log.Logger
 	{
-		//	Although not explicitly stated in the docs, os.File should be safe for concurrent use,
-		//	especially since NewJSONLogger only calls w.Write at most once per log event.
-		//	Otherwise we would e.g. need to wrap os.Stdout with log.NewSyncWriter.
+		// Although not explicitly stated in the docs, os.File should be safe for concurrent use,
+		// especially since NewJSONLogger only calls w.Write at most once per log event.
+		// Otherwise we would e.g. need to wrap os.Stdout with log.NewSyncWriter.
 		logger = log.NewJSONLogger(writer)
 		logger = level.NewFilter(logger, levelFilter, level.SquelchNoLevel(false))
 		logger = log.With(logger, "timestamp", log.DefaultTimestampUTC)

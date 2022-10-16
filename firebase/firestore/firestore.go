@@ -1,4 +1,4 @@
-// Package firestore implements helper functions and utilities to make working with "cloud.google.com/go/firestore" easier.
+// Package firestore implements helper functions and utilities to make working with package "cloud.google.com/go/firestore" easier.
 package firestore
 
 import (
@@ -22,6 +22,8 @@ func NewFirestoreErrorInternal(inner error) errors.Error {
 	return errors.New(inner, firestoreErrOrigin, errors.Internal)
 }
 
+// Parses the given firestore error and returns an instance of Error from package "github.com/d39b/kit/errors"
+// with an appropriate error code set.
 func ParseFirestoreError(err error) errors.Error {
 	if status.Code(err) == codes.NotFound {
 		return NewFirestoreError(err, errors.NotFound)
@@ -30,6 +32,7 @@ func ParseFirestoreError(err error) errors.Error {
 	}
 }
 
+// Unmarshal the given snapshot into result, which should usually be a pointer to a struct or map.
 func UnmarshalDocSnapshot(snap *firestore.DocumentSnapshot, result interface{}) error {
 	err := snap.DataTo(result)
 	if err != nil {
@@ -46,6 +49,7 @@ func GetDocumentSnapshotById(ctx context.Context, col *firestore.CollectionRef, 
 	return snap, nil
 }
 
+// Gets and unmarshals the document with the given id into result.
 func GetDocumentById(ctx context.Context, col *firestore.CollectionRef, id string, result interface{}) error {
 	snap, err := GetDocumentSnapshotById(ctx, col, id)
 	if err != nil {
@@ -54,6 +58,9 @@ func GetDocumentById(ctx context.Context, col *firestore.CollectionRef, id strin
 	return UnmarshalDocSnapshot(snap, result)
 }
 
+// Gets and unmarshals the document with the given id into result.
+// Also returns a TransactionExpectations value that represents the last time the document
+// was modified. Can be used to implement optimistic transactions.
 func GetDocumentByIdWithTE(ctx context.Context, col *firestore.CollectionRef, id string, result interface{}) (TransactionExpectations, error) {
 	snap, err := GetDocumentSnapshotById(ctx, col, id)
 	if err != nil {
@@ -69,6 +76,7 @@ func GetDocumentByIdWithTE(ctx context.Context, col *firestore.CollectionRef, id
 	return te, nil
 }
 
+// Create a new document with the given id in the given collection.
 func CreateDocument(ctx context.Context, col *firestore.CollectionRef, id string, doc interface{}) error {
 	_, err := col.Doc(id).Create(ctx, doc)
 	if err != nil {
@@ -113,8 +121,7 @@ func GetDocumentsForQuery(ctx context.Context, query firestore.Query) ([]*firest
 }
 
 // TransactionExpectation represents the state of a document, i.e. whether or not it exists and if it exists the last time it was updated/modified.
-// Can be used to implement safe transactions, where we don't have to read and modify the document in the same firestore transaction function.
-// This is convenient/necessary if we don't want to leak any implementation details about the transaction handling into a component/service that uses a data store based on firestore.
+// Can be used to implement safe optimistic transactions.
 type TransactionExpectation struct {
 	DocRef     *firestore.DocumentRef
 	Exists     bool
@@ -130,7 +137,7 @@ func TransactionExpectationFromSnapshot(snap *firestore.DocumentSnapshot) Transa
 }
 
 // Returns nil if the given document snapshot satisfies the transaction expectation, i.e.
-// they both refer to the same document and existence as well as latest update time must be equal.
+// they both refer to the same document and existence as well as latest update times are equal.
 func (te TransactionExpectation) IsSatisfied(snap *firestore.DocumentSnapshot) error {
 	if te.DocRef.Path != snap.Ref.Path {
 		return NewFirestoreError(nil, errors.InvalidArgument).

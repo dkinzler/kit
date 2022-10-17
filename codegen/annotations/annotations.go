@@ -8,16 +8,18 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/d39b/kit/tools/codegen/parse"
+	"github.com/d39b/kit/codegen/parse"
 )
 
+// An annotation on an interface.
 type InterfaceAnnotation struct {
 	// Name of the annotation
 	Name string
 	// The annotation on the interface
 	Annotation string
-	// Annotations on the interface methods
-	// Slice has the same length as parse.Interface.Methods, contain empty string for methods that have no annotation.
+	// Annotations on the interface methods.
+	// Slice has the same length as parse.Interface.Methods.
+	// Contain empty string for methods without an annotation.
 	MethodAnnotations []string
 }
 

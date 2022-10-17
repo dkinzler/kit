@@ -3,7 +3,7 @@ package annotations
 import (
 	"testing"
 
-	"github.com/d39b/kit/tools/codegen/parse"
+	"github.com/d39b/kit/codegen/parse"
 
 	"github.com/stretchr/testify/assert"
 )

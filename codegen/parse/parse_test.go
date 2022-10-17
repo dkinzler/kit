@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//Note: We can use relative paths here, since go test will always run package tests with the working directory set to the directory that contains the package being tested.
+// Note: We can use relative paths here, since go test will always run package tests with the working directory set to the directory that contains the package being tested.
 //The testdata dir contains an example go project that we can parse.
 
 func TestModuleCanBeFound(t *testing.T) {

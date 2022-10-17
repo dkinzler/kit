@@ -10,7 +10,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/d39b/kit/tools/codegen/gen"
+	"github.com/d39b/kit/codegen/gen"
 )
 
 const kitEndpointPackage = "github.com/go-kit/kit/endpoint"

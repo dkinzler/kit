@@ -1,4 +1,5 @@
-// Package parse finds interfaces in go files and parses them into a representation that is more convenient for code generation.
+// Package parse provides functionality to parse go files and create representations of
+// code elements suitable for code generation.
 package parse
 
 import (
@@ -16,7 +17,8 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
-// Recursively searches the given path for interfaces.
+// Recursively searches the directory given by path and parses
+// any interfaces.
 func ParseDir(path string, module Module) ([]Interface, error) {
 	path, err := filepath.Abs(path)
 	if err != nil {
@@ -36,16 +38,16 @@ func ParseDir(path string, module Module) ([]Interface, error) {
 	return result, nil
 }
 
-type Package struct {
-	//path to the package in the filesystem
+type pkgPath struct {
+	// path to the package in the filesystem
 	FilePath string
-	//full package path, i.e. the full name of the package e.g. "github.com/xyz/abc"
+	// full package path, e.g. "github.com/xyz/abc"
 	PackagePath string
 }
 
-// Returns a list of packages contained in the given root directory.
-func findPackages(root string, module Module) []Package {
-	var result []Package
+// Returns a list of packages contained in directory root.
+func findPackages(root string, module Module) []pkgPath {
+	var result []pkgPath
 	filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -56,7 +58,7 @@ func findPackages(root string, module Module) []Package {
 				log.Println("could not build package path for file path:", path)
 				return nil
 			}
-			result = append(result, Package{
+			result = append(result, pkgPath{
 				PackagePath: packagePath,
 				FilePath:    path,
 			})
@@ -66,10 +68,10 @@ func findPackages(root string, module Module) []Package {
 	return result
 }
 
-func findInterfacesInPackage(pkg Package) ([]Interface, error) {
+func findInterfacesInPackage(pkg pkgPath) ([]Interface, error) {
 	var result []Interface
 
-	//parser.ParseDir does not work recursively, i.e. it will only consider files in the given directory and not any subdirectories.
+	// Parser.ParseDir does not work recursively, i.e. it will only consider files in the given directory and not any subdirectories.
 	packageMap, err := parser.ParseDir(
 		token.NewFileSet(),
 		pkg.FilePath,
@@ -86,21 +88,22 @@ func findInterfacesInPackage(pkg Package) ([]Interface, error) {
 		return nil, errors.New(fmt.Sprintf("could not parse directory %v, got error: %v", pkg.FilePath, err))
 	}
 
-	//there should at most be one package here, at least if the code that this is run on compiles
-	//since a single directory cannot contain files for more than one package
+	// There should at most be one package here,
+	// since a single directory cannot contain files for more than one package (if the go code compiles).
 	for _, p := range packageMap {
 		for filename, f := range p.Files {
-			//name of package directory should match package path, i.e. files for a package "example.com/xyz/abc" should be in a folder "abc" and each file should contain the line "package abc".
+			// Name of package directory should match package path, i.e. files for a package "example.com/xyz/abc" should be in a directory "abc"
+			// and each file should contain the line "package abc".
 			base := path.Base(pkg.PackagePath)
 			pname := f.Name.Name
 			if base != pname {
-				//log.Println("package directory name", base, "doesn't match package name declared in files", pname)
+				// log.Println("package directory name", base, "doesn't match package name declared in files", pname)
 			} else {
 				i, err := findInterfacesInFile(f, pkg.PackagePath)
 				if err != nil {
 					return nil, err
 				}
-				//set filename
+				// set filename
 				for j := 0; j < len(i); j++ {
 					i[j].File = filename
 				}
@@ -115,13 +118,13 @@ func findInterfacesInPackage(pkg Package) ([]Interface, error) {
 // Module provides functions to convert relative package names and file paths
 // to absolute ones, based on a module.
 type Module struct {
-	// root path of the module
+	// root path of the module in the filesystem
 	Path string
-	// name of the module
+	// name of the module, e.g. "github.com/xyz/abc"
 	Name string
 }
 
-// Will find the module the given directory belongs to by searching for go.mod file
+// Will find the module the given directory belongs to by searching for a go.mod file
 // in the directory and its parents.
 func NewModuleFromDir(dir string) (Module, error) {
 	dir, err := filepath.Abs(dir)
@@ -153,6 +156,9 @@ func NewModuleFromDir(dir string) (Module, error) {
 	return Module{}, errors.New("no module found")
 }
 
+// Returns a package path without the module prefix.
+// E.g. when called with "example.com/xyz/abc" on a module with name "example.com/xyz"
+// will return "abc".
 func (m Module) PackagePathWithoutModule(p string) string {
 	result := strings.TrimPrefix(p, m.Name)
 	return strings.TrimPrefix(result, "/")
@@ -172,7 +178,7 @@ func (m Module) FileName(packageName, fileName string) string {
 // Returns the package path from a given file path.
 // E.g. if the root module path is /abc/xyz/somemodule, the module name is somemodule
 // and the file path is "/abc/xyz/somemodule/internal/xyz/file.go" then
-// the resulting package path would be somemodule/internal/xyz
+// the resulting package path would be "somemodule/internal/xyz".
 // Note that for this to work the given file path must have the root path of the module as a prefix
 func (m Module) PackagePathFromFilePath(filePath string) (string, error) {
 	filePath = filepath.Clean(filePath)

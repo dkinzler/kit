@@ -12,7 +12,7 @@ type Interface struct {
 	// Comments belonging to this interface, i.e. the comments directly above the type definition in the source code.
 	Comments []string
 
-	//the file (path) this interface is defined in
+	// File (path) this interface is defined in
 	File string
 }
 
@@ -31,14 +31,14 @@ type Method struct {
 // Param represents a method parameter or return value
 type Param struct {
 	// Name of the parameter, e.g. "ctx" for the parameter definition "ctx context.Context".
+	// Can be empty e.g. for unnamed return values.
 	Name string
 	// Type of the parameter
 	Type ParamType
 }
 
 // Represents the type of a parameter.
-// Note: this does not support some types like function types, channels and anonymous structs, since
-// these types should rarely appear for the kinds of interfaces this package is used on.
+// Note: this does not support some types like function types, channels and anonymous structs.
 type ParamType interface {
 	// Returns a list of all the packages required by this type.
 	// E.g. a type map[context.Context]*http.Request requires the pacakges "context" and "http".
@@ -47,7 +47,7 @@ type ParamType interface {
 
 // Simple types are: bool, string, error, int, float (and all the variations of the numeric types), interface{}, structs like http.Request.
 // They consist of just the type name and possibly a package prefix.
-// Note that pointers (*http.Request), slices, maps, function types, channels, anonymous structs, ... are composite types.
+// On the other hand pointers (*http.Request), slices, maps, function types, channels, anonymous structs, ... are composite types.
 type SimpleType struct {
 	// Name of the type, e.g. "string" or "Request" for "http.Request"
 	Type string

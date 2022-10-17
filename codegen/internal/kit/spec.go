@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/d39b/kit/tools/codegen/annotations"
-	"github.com/d39b/kit/tools/codegen/gen"
-	"github.com/d39b/kit/tools/codegen/parse"
+	"github.com/d39b/kit/codegen/annotations"
+	"github.com/d39b/kit/codegen/gen"
+	"github.com/d39b/kit/codegen/parse"
 )
 
 // KitGenSpecification defines what the code generator should generate.
@@ -26,15 +26,15 @@ type KitGenSpecification struct {
 
 	// package name used for generated endpoints
 	// can be a full package path or relative to the module name
-	// if empty will use the package of the interface
+	// If empty will not generate endpoints.
 	EndpointPackage string `json:"endpointPackage"`
 	// full path of the package that will contain the generated endpoint code
 	// we need this to later import this package to e.g. generate http handlers
 	EndpointPackageFullPath string
 	// output file for endpoint code
 	EndpointOutput string `json:"endpointOutput"`
-	// package name used for generated http handlers
-	// if empty will use the package of the interface
+	// Package name used for generated http handlers.
+	// If empty will not generate anything.
 	HttpPackage         string `json:"httpPackage"`
 	HttpPackageFullPath string
 	// output file for http code
@@ -53,9 +53,13 @@ func (g KitGenSpecification) httpPackageName() string {
 }
 
 // Checks if a given specification is valid.
-// A specification is not value if there are e.g. multiple endpoints with the same name
+// A specification is not valid if one of the following conditions is not satisfied:
+//   - there cannot be two endpoints with the same name
+//   - any interface method (for which at least one endpoint is defined) must have a context.Context value as first parameter
+//   - any interface method (for which at least one endpoint is defined) must have at most two return values and last return value must be of type error
+//   - if http code is generated, endpoints should have http method, path and success code set
 func (spec KitGenSpecification) IsValid() error {
-	//check that there are no duplicate endpoint names
+	// check that there are no duplicate endpoint names
 	names := make(map[string]bool)
 	for _, es := range spec.Endpoints {
 		for _, e := range es.EndpointSpecs {
@@ -66,8 +70,9 @@ func (spec KitGenSpecification) IsValid() error {
 		}
 	}
 
-	//check that interface methods have context.Context as first parameter
-	for _, m := range spec.Interface.Methods {
+	// check that interface methods have context.Context as first parameter
+	for _, e := range spec.Endpoints {
+		m := e.Method
 		if len(m.Params) == 0 {
 			return errors.New(fmt.Sprintf("interface method %v doesn't have context.Context parameter", m.Name))
 		} else {
@@ -78,8 +83,9 @@ func (spec KitGenSpecification) IsValid() error {
 		}
 	}
 
-	//check that interface methods have either 1 or 2 return values and last one is error
-	for _, m := range spec.Interface.Methods {
+	// check that interface methods have either 1 or 2 return values and last one is error
+	for _, e := range spec.Endpoints {
+		m := e.Method
 		if len(m.Returns) < 1 || len(m.Returns) > 2 {
 			return errors.New(fmt.Sprintf("interface method %v has invalid amount of return values", m.Name))
 		}
@@ -89,9 +95,23 @@ func (spec KitGenSpecification) IsValid() error {
 		}
 	}
 
-	//TODO what else do we have to check?
-	//if GenerateHttp is true, every endpoint should have a http method, path and path set
-	//and successcode should be inited to a default value
+	// If GenerateHttp is true, every endpoint should have a http method, path and path set,
+	// and success code should be set to a default value.
+	if spec.GenerateHttp {
+		for _, e := range spec.Endpoints {
+			for _, es := range e.EndpointSpecs {
+				if es.HttpSpec.Method == "" {
+					return errors.New(fmt.Sprintf("http method is empty for endpoint %v", es.Name))
+				}
+				if es.HttpSpec.Path == "" {
+					return errors.New(fmt.Sprintf("http path is empty for endpoint %v", es.Name))
+				}
+				if es.HttpSpec.SuccessCode == 0 {
+					return errors.New(fmt.Sprintf("success code not set for endpoint %v", es.Name))
+				}
+			}
+		}
+	}
 
 	return nil
 }
@@ -207,21 +227,19 @@ func SpecFromAnnotations(i parse.Interface, m parse.Module, a annotations.Interf
 
 	spec.Endpoints = endpointsForMethods
 
-	if spec.EndpointPackage == "" {
-		spec.EndpointPackage = m.PackagePathWithoutModule(i.Package)
-		spec.EndpointPackageFullPath = i.Package
-	} else {
+	if spec.EndpointPackage != "" {
+		spec.GenerateEndpoints = true
 		spec.EndpointPackageFullPath = m.FullPackagePath(spec.EndpointPackage)
 	}
 	if spec.EndpointOutput == "" {
 		spec.EndpointOutput = "endpoint.gen.go"
 	}
 
-	if spec.HttpPackage == "" {
-		spec.HttpPackage = m.PackagePathWithoutModule(i.Package)
-		spec.HttpPackageFullPath = i.Package
-	} else {
+	if spec.HttpPackage != "" {
 		spec.HttpPackageFullPath = m.FullPackagePath(spec.HttpPackage)
+		if spec.GenerateEndpoints {
+			spec.GenerateHttp = true
+		}
 	}
 	if spec.HttpOutput == "" {
 		spec.HttpOutput = "http.gen.go"

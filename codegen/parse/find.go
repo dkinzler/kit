@@ -16,7 +16,7 @@ func findInterfacesInFile(file *ast.File, packagePath string) (result []Interfac
 			err = errors.New(fmt.Sprint(r))
 		}
 	}()
-	visitor := &Visitor{
+	visitor := &visitor{
 		PackagePath: packagePath,
 		Imports:     importsFromFile(file),
 	}
@@ -24,9 +24,9 @@ func findInterfacesInFile(file *ast.File, packagePath string) (result []Interfac
 	return visitor.Interfaces, nil
 }
 
-// Visitor implements the ast.Visitor interface.
+// visitor implements the ast.visitor interface.
 // It can be used with the ast.Walk function to traverse an AST and find all the interfaces.
-type Visitor struct {
+type visitor struct {
 	// Result, i.e. the list of interfaces found so var in the current walk
 	Interfaces []Interface
 	// Full package path for the current file
@@ -69,7 +69,7 @@ func importsFromFile(f *ast.File) map[string]string {
 
 // Checks if the current node represents an interface type definition.
 // If so, attempts to parse the ast and create an instance of Interface.
-func (v *Visitor) Visit(node ast.Node) ast.Visitor {
+func (v *visitor) Visit(node ast.Node) ast.Visitor {
 	gd, ok := node.(*ast.GenDecl)
 	if !ok {
 		return v
@@ -107,7 +107,7 @@ func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 	return v
 }
 
-func (v *Visitor) parseComments(cg *ast.CommentGroup) []string {
+func (v *visitor) parseComments(cg *ast.CommentGroup) []string {
 	if cg == nil || len(cg.List) == 0 {
 		return nil
 	}
@@ -141,7 +141,7 @@ func trimComment(comment string) []string {
 	}
 }
 
-func (v *Visitor) parseMethods(it *ast.InterfaceType) []Method {
+func (v *visitor) parseMethods(it *ast.InterfaceType) []Method {
 	if it.Methods == nil || len(it.Methods.List) == 0 {
 		return nil
 	}
@@ -156,7 +156,7 @@ func (v *Visitor) parseMethods(it *ast.InterfaceType) []Method {
 	return methods
 }
 
-func (v Visitor) parseMethod(method *ast.Field) (Method, bool) {
+func (v visitor) parseMethod(method *ast.Field) (Method, bool) {
 	var result Method
 	//field type must be function type
 	ft, ok := method.Type.(*ast.FuncType)
@@ -211,7 +211,7 @@ func defaultParamName(i int) string {
 
 // A single field can declare multiple parameters, e.g. for the method declaration
 // Method(a, b, c int) the three parameters would be represented by a single ast.Field.
-func (v Visitor) parseParams(param *ast.Field) ([]Param, bool) {
+func (v visitor) parseParams(param *ast.Field) ([]Param, bool) {
 	var result []Param
 
 	paramType := v.parseParamType(param.Type)
@@ -233,7 +233,7 @@ func (v Visitor) parseParams(param *ast.Field) ([]Param, bool) {
 
 // TODO there are some other possible types that we don't handle like
 // functions, channels, anonymous interfaces or structs, ...
-func (v Visitor) parseParamType(t ast.Expr) ParamType {
+func (v visitor) parseParamType(t ast.Expr) ParamType {
 	switch pt := t.(type) {
 	case *ast.SelectorExpr:
 		typeName := pt.Sel.Name

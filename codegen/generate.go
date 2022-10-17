@@ -70,8 +70,6 @@ func generate(config GeneratorConfig) error {
 						continue
 					}
 				}
-				spec.GenerateEndpoints = true
-				spec.GenerateHttp = true
 
 				files, err := kit.NewKitGenerator(spec).Generate()
 				if err != nil {

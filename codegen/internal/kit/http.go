@@ -149,7 +149,6 @@ func (g *KitGenerator) generateHttpRegisterHandlersFunc() jen.Code {
 			stmts = append(stmts, httpEndpointCodeStmts{
 				Path: spec.HttpSpec.Path,
 				Stmts: []jen.Code{
-					//TODO Fix all this, need to use endpoint name
 					jen.Id(spec.httpHandlerVarName()).Op(":=").Qual(kitHttpPackage, "NewServer").Call(
 						jen.Id("endpoints").Dot(spec.endpointSetFieldName()),
 						decodeFuncName,

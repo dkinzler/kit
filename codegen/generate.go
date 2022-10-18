@@ -25,20 +25,9 @@ type GeneratorConfig struct {
 }
 
 func generate(config GeneratorConfig) error {
-	var module parse.Module
-	var err error
-	if config.ModuleName != "" && config.ModulePath != "" {
-		module = parse.Module{
-			Path: config.ModulePath,
-			Name: config.ModuleName,
-		}
-	} else {
-		log.Println("searching for go module...")
-		module, err = parse.NewModuleFromDir(config.InputDir)
-		if err != nil {
-			return err
-		}
-		log.Println("found go module", module.Name, "with root dir", module.Path)
+	module, err := getModule(config)
+	if err != nil {
+		return err
 	}
 
 	is, err := parse.ParseDir(config.InputDir, module)
@@ -61,54 +50,71 @@ func generate(config GeneratorConfig) error {
 
 		for name, annotations := range a {
 			if name == "Kit" {
-				spec, err := kit.SpecFromAnnotations(i, module, annotations)
+				files, err := generateKit(i, module, annotations)
 				if err != nil {
 					if config.FailOnError {
 						return err
-					} else {
-						//move to next interface
-						continue
 					}
+				} else {
+					generatedCode = append(generatedCode, files...)
 				}
-
-				files, err := kit.NewKitGenerator(spec).Generate()
-				if err != nil {
-					if config.FailOnError {
-						return err
-					} else {
-						//move to next interface
-						continue
-					}
-				}
-				generatedCode = append(generatedCode, files...)
 			} else if name == "Mock" {
-				spec, err := mock.SpecFromAnnotations(i, module, annotations)
+				files, err := generateMock(i, module, annotations)
 				if err != nil {
 					if config.FailOnError {
 						return err
-					} else {
-						//move to next interface
-						continue
 					}
+				} else {
+					generatedCode = append(generatedCode, files...)
 				}
-
-				files, err := mock.NewMockGenerator(spec).Generate()
-				if err != nil {
-					if config.FailOnError {
-						return err
-					} else {
-						//move to next interface
-						continue
-					}
-				}
-				generatedCode = append(generatedCode, files...)
 			} else {
 				log.Printf("unknown annotation %v on interface %v\n", name, i.Name)
 			}
 		}
 	}
 
-	generatedFiles := gen.MergeResults(generatedCode)
+	return outputGeneratedCode(generatedCode)
+}
+
+func getModule(config GeneratorConfig) (parse.Module, error) {
+	if config.ModuleName != "" && config.ModulePath != "" {
+		return parse.Module{
+			Path: config.ModulePath,
+			Name: config.ModuleName,
+		}, nil
+	} else {
+		log.Println("searching for go module...")
+		module, err := parse.NewModuleFromDir(config.InputDir)
+		if err != nil {
+			return parse.Module{}, err
+		}
+		log.Println("found go module", module.Name, "with root dir", module.Path)
+		return module, nil
+	}
+}
+
+func generateKit(i parse.Interface, module parse.Module, annotations annotations.InterfaceAnnotation) ([]gen.GenResult, error) {
+	spec, err := kit.SpecFromAnnotations(i, module, annotations)
+	if err != nil {
+		return nil, err
+	}
+
+	files, err := kit.NewKitGenerator(spec).Generate()
+	return files, err
+}
+
+func generateMock(i parse.Interface, module parse.Module, annotations annotations.InterfaceAnnotation) ([]gen.GenResult, error) {
+	spec, err := mock.SpecFromAnnotations(i, module, annotations)
+	if err != nil {
+		return nil, err
+	}
+
+	files, err := mock.NewMockGenerator(spec).Generate()
+	return files, err
+}
+
+func outputGeneratedCode(c []gen.GenResult) error {
+	generatedFiles := gen.MergeResults(c)
 
 	for _, gf := range generatedFiles {
 		err := saveFile(gf.File, gf.Path)

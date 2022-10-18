@@ -185,7 +185,7 @@ func (s *SimpleGenerator) GenParamNames(params []parse.Param) []string {
 	return result
 }
 
-// Lowercase first letter of string, useful for generating e.g. paramter or variable names.
+// Lowercase first letter of string, useful for generating e.g. parameter or variable names.
 func LowercaseFirst(s string) string {
 	for i, char := range s {
 		return string(unicode.ToLower(char)) + s[i+1:]

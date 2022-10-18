@@ -59,60 +59,44 @@ func (g KitGenSpecification) httpPackageName() string {
 //   - any interface method (for which at least one endpoint is defined) must have at most two return values and last return value must be of type error
 //   - if http code is generated, endpoints should have http method, path and success code set
 func (spec KitGenSpecification) IsValid() error {
-	// check that there are no duplicate endpoint names
+	err := spec.ContainsDuplicateEndpointName()
+	if err != nil {
+		return err
+	}
+
+	// check that endpoint specifications are valid
+	for _, e := range spec.Endpoints {
+		err = e.IsValid()
+		if err != nil {
+			return err
+		}
+	}
+
+	// If GenerateHttp is true, check that http specs are valid.
+	if spec.GenerateHttp {
+		for _, e := range spec.Endpoints {
+			for _, es := range e.EndpointSpecs {
+				err = es.HttpSpec.IsValid()
+				if err != nil {
+					return fmt.Errorf("invalid http spec for endpoint %v: %w", es.Name, err)
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func (spec KitGenSpecification) ContainsDuplicateEndpointName() error {
 	names := make(map[string]bool)
 	for _, es := range spec.Endpoints {
 		for _, e := range es.EndpointSpecs {
 			if _, ok := names[e.Name]; ok {
-				return errors.New(fmt.Sprintf("kit specification contains duplicate endpoint name: %v", e.Name))
+				return errors.New(fmt.Sprintf("duplicate endpoint name %v", e.Name))
 			}
 			names[e.Name] = true
 		}
 	}
-
-	// check that interface methods have context.Context as first parameter
-	for _, e := range spec.Endpoints {
-		m := e.Method
-		if len(m.Params) == 0 {
-			return errors.New(fmt.Sprintf("interface method %v doesn't have context.Context parameter", m.Name))
-		} else {
-			firstParam := m.Params[0]
-			if !parse.IsSimpleType(firstParam.Type, "Context", "context") {
-				return errors.New(fmt.Sprintf("interface method %v doesn't have context.Context as first parameter", m.Name))
-			}
-		}
-	}
-
-	// check that interface methods have either 1 or 2 return values and last one is error
-	for _, e := range spec.Endpoints {
-		m := e.Method
-		if len(m.Returns) < 1 || len(m.Returns) > 2 {
-			return errors.New(fmt.Sprintf("interface method %v has invalid amount of return values", m.Name))
-		}
-		lastReturnValue := m.Returns[len(m.Returns)-1]
-		if !parse.IsSimpleType(lastReturnValue.Type, "error", "") {
-			return errors.New(fmt.Sprintf("interface method %v does not have error as last return value", m.Name))
-		}
-	}
-
-	// If GenerateHttp is true, every endpoint should have a http method, path and path set,
-	// and success code should be set to a default value.
-	if spec.GenerateHttp {
-		for _, e := range spec.Endpoints {
-			for _, es := range e.EndpointSpecs {
-				if es.HttpSpec.Method == "" {
-					return errors.New(fmt.Sprintf("http method is empty for endpoint %v", es.Name))
-				}
-				if es.HttpSpec.Path == "" {
-					return errors.New(fmt.Sprintf("http path is empty for endpoint %v", es.Name))
-				}
-				if es.HttpSpec.SuccessCode == 0 {
-					return errors.New(fmt.Sprintf("success code not set for endpoint %v", es.Name))
-				}
-			}
-		}
-	}
-
 	return nil
 }
 
@@ -128,8 +112,33 @@ type EndpointSpecifications struct {
 	// only used if http handlers are generated.
 	// Since we expect the first parameter of an interface method to be a "context.Context", the length of this slice
 	// should equal len(Method.Params) - 1.
-	// TODO we could let every endpoint for this method define their own http params, which would result in multiple http decode funcs, but this is not necessary for now
+	// TODO we could let every endpoint for this method define their own http params, which would result in multiple http decode funcs, but this is not necessary for now.
 	HttpParams []HttpParamType `json:"httpParams"`
+}
+
+func (e EndpointSpecifications) IsValid() error {
+	m := e.Method
+
+	// check that interface method has context.Context as first parameter
+	if len(m.Params) == 0 {
+		return errors.New(fmt.Sprintf("interface method %v doesn't have context.Context parameter", m.Name))
+	} else {
+		firstParam := m.Params[0]
+		if !parse.IsSimpleType(firstParam.Type, "Context", "context") {
+			return errors.New(fmt.Sprintf("interface method %v doesn't have context.Context as first parameter", m.Name))
+		}
+	}
+
+	// check that interface method has either 1 or 2 return values and last one is error
+	if len(m.Returns) < 1 || len(m.Returns) > 2 {
+		return errors.New(fmt.Sprintf("interface method %v has invalid amount of return values", m.Name))
+	}
+	lastReturnValue := m.Returns[len(m.Returns)-1]
+	if !parse.IsSimpleType(lastReturnValue.Type, "error", "") {
+		return errors.New(fmt.Sprintf("interface method %v does not have error as last return value", m.Name))
+	}
+
+	return nil
 }
 
 func (e EndpointSpecifications) endpointRequestTypeName() string {
@@ -179,6 +188,19 @@ type HttpSpec struct {
 	// http code for the response on success
 	SuccessCode int `json:"successCode"`
 	// how the values from the interface method are obtained from the http request
+}
+
+func (spec HttpSpec) IsValid() error {
+	if spec.Method == "" {
+		return errors.New("http method is empty")
+	}
+	if spec.Path == "" {
+		return errors.New("http path is empty")
+	}
+	if spec.SuccessCode == 0 {
+		return errors.New("success code not set for endpoint")
+	}
+	return nil
 }
 
 // HttpParamType represents how the parameters of an interface method should be obtained from a http request.

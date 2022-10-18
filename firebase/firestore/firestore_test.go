@@ -250,7 +250,7 @@ func TestTransactionExpectations(t *testing.T) {
 	//this should verify
 	snaps, err := fs.GetAll(ctx, []*firestore.DocumentRef{col.Doc(id2), col.Doc(id1)})
 	a.Nil(err)
-	a.Nil(tes.VerifyTransactionExpectations(snaps))
+	a.Nil(tes.Verify(snaps))
 
 	err = UpdateDocument(ctx, col, id1, []firestore.Update{
 		{Path: "f2", Value: 1337},
@@ -260,5 +260,5 @@ func TestTransactionExpectations(t *testing.T) {
 	//should not verify
 	snaps, err = fs.GetAll(ctx, []*firestore.DocumentRef{col.Doc(id2), col.Doc(id1)})
 	a.Nil(err)
-	a.NotNil(tes.VerifyTransactionExpectations(snaps))
+	a.NotNil(tes.Verify(snaps))
 }

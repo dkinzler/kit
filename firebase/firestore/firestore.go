@@ -156,7 +156,14 @@ func (te TransactionExpectation) IsSatisfied(snap *firestore.DocumentSnapshot) e
 	return nil
 }
 
-// A set of transaction expectations.
+// A set of transaction expectations, that can be used to implement optimistic concurrency/transactions.
+// Functions that read data from firestore can return TransactionExpectations values, multiple of them can be combined.
+// If we then try to update the data and want to make sure that it hasn't changed since we last read it, we can use a transaction
+// that first gets the documents and then compares them to the TransactionExpectations value using the VerifyTransactionExpectations() function.
+//
+// Optmistic concurrency works well if the probability of concurrent modifications is low.
+// It has the advantage that it is easy to create code that guarantees consistency while not leaking any implementation details of the data store layer
+// into business logic code.
 type TransactionExpectations map[string]TransactionExpectation
 
 func (tes TransactionExpectations) Add(te TransactionExpectation) {
@@ -165,6 +172,25 @@ func (tes TransactionExpectations) Add(te TransactionExpectation) {
 
 func (tes TransactionExpectations) Remove(docRef *firestore.DocumentRef) {
 	delete(tes, docRef.Path)
+}
+
+// Combine two sets of transaction expectations.
+// If both sets contain an expectation for the same document, the expectation with the more recent update time will be used.
+func (tes TransactionExpectations) Combine(other TransactionExpectations) TransactionExpectations {
+	combined := make(map[string]TransactionExpectation)
+	for path, te := range tes {
+		combined[path] = te
+	}
+	for path, te := range other {
+		if e, ok := combined[path]; ok {
+			if e.UpdateTime.Before(te.UpdateTime) {
+				combined[path] = te
+			}
+		} else {
+			combined[path] = te
+		}
+	}
+	return combined
 }
 
 func (tes TransactionExpectations) Get(docRef *firestore.DocumentRef) (TransactionExpectation, bool) {
@@ -188,7 +214,7 @@ func (tes TransactionExpectations) DocRefs() []*firestore.DocumentRef {
 // and the document existence and latest update time of the snaphost and transaction expectation are equal.
 //
 // Note that there must be a transaction expectation for every snapshot, but not the other way around.
-func (tes TransactionExpectations) VerifyTransactionExpectations(snaps []*firestore.DocumentSnapshot) error {
+func (tes TransactionExpectations) Verify(snaps []*firestore.DocumentSnapshot) error {
 	for _, snap := range snaps {
 		te, ok := tes.Get(snap.Ref)
 		if !ok {
@@ -199,6 +225,25 @@ func (tes TransactionExpectations) VerifyTransactionExpectations(snaps []*firest
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// Verifies the transaction expectations in the given firestore transaction.
+func VerifyTransactionExpectations(t *firestore.Transaction, te TransactionExpectations) error {
+	docRefs := te.DocRefs()
+	if len(docRefs) == 0 {
+		return nil
+	}
+
+	snaps, err := t.GetAll(docRefs)
+	if err != nil {
+		return err
+	}
+
+	err = te.Verify(snaps)
+	if err != nil {
+		return err
 	}
 	return nil
 }

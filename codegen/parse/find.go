@@ -232,7 +232,7 @@ func (v visitor) parseParams(param *ast.Field) ([]Param, bool) {
 }
 
 // TODO there are some other possible types that we don't handle like
-// functions, channels, anonymous interfaces or structs, ...
+// functions, channels, anonymous structs, ...
 func (v visitor) parseParamType(t ast.Expr) ParamType {
 	switch pt := t.(type) {
 	case *ast.SelectorExpr:

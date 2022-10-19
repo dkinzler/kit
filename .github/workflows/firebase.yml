@@ -1,0 +1,34 @@
+name: Firebase Integration Tests
+
+on:
+  push:
+    branches: [ "main" ]
+    # run this workflow only if changes were made to the firebase package
+    # or a subpackage
+    paths:
+      - 'firebase/**'
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+
+    - name: Tests with Firebase emulators 
+      uses: w9jds/firebase-action@master
+      with:
+        args: >
+          -P "demo-project" -c ".firebase.json" emulators:exec
+          "go test -v -count=1 ./firebase/emulator &&
+          go test -v -count=1 ./firebase/auth && 
+          go test -v -count=1 ./firebase/firestore"
+      env:
+        FIREBASE_PROJECT_ID: demo-project
+        FIREBASE_AUTH_EMULATOR_HOST: localhost:9099
+        FIRESTORE_EMULATOR_HOST: localhost:8080

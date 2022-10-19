@@ -1,4 +1,6 @@
-// Package log implements convenience functionality on top of the Go kit logging package "github.com/go-kit/log".
+// Package log implements convenience functionality on top of the Go kit logging package [github.com/go-kit/log].
+//
+// [github.com/go-kit-log]: https://pkg.go.dev/github.com/go-kit/log
 package log
 
 import (
@@ -11,9 +13,11 @@ import (
 	"github.com/go-kit/log/level"
 )
 
-// Logger wraps a Logger from "github.com/go-kit/log" to provide a more convenient way
+// Logger wraps a Logger from package [github.com/go-kit/log] to provide a more convenient way
 // to log with a particular level.
-// Note that it still implements the "github.com/go-kit/log/Logger" interface.
+// Note that Logger still implements the Logger interface from [github.com/go-kit/log].
+//
+// [github.com/go-kit-log]: https://pkg.go.dev/github.com/go-kit/log
 type Logger struct {
 	l log.Logger
 }
@@ -60,6 +64,7 @@ const AllowWarn Option = "allowWarn"
 const AllowError Option = "allowError"
 
 // Pretty print JSON log events, i.e. as multiple indented lines.
+// Useful for development and testing.
 const PrettyPrint Option = "prettyPrint"
 
 // Default logger that encodes log events as a single json object

@@ -16,16 +16,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
+    - uses: actions/setup-go@v3
       with:
         go-version: 1.19
 
-    - name: Tests with Firebase emulators 
-      uses: w9jds/firebase-action@master
+    - uses: actions/setup-node@v1
       with:
-        args: >
-          -P "demo-project" -c ".firebase.json" emulators:exec
+        node-version: '16'
+    - run: npm install -g firebase-tools
+    - run: >
+          firebase -P "demo-project" -c ".firebase.json" emulators:exec
           "go test -v -count=1 ./firebase/emulator &&
           go test -v -count=1 ./firebase/auth && 
           go test -v -count=1 ./firebase/firestore"

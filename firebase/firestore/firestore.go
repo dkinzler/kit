@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/d39b/kit/errors"
+	"github.com/dkinzler/kit/errors"
 
 	"cloud.google.com/go/firestore"
 	"google.golang.org/grpc/codes"
@@ -22,7 +22,7 @@ func NewFirestoreErrorInternal(inner error) errors.Error {
 	return errors.New(inner, firestoreErrOrigin, errors.Internal)
 }
 
-// Parses the given firestore error and returns an instance of Error from package "github.com/d39b/kit/errors"
+// Parses the given firestore error and returns an instance of Error from package "github.com/dkinzler/kit/errors"
 // with an appropriate error code set.
 func ParseFirestoreError(err error) errors.Error {
 	if status.Code(err) == codes.NotFound {

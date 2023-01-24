@@ -10,13 +10,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/d39b/kit/codegen/gen"
+	"github.com/dkinzler/kit/codegen/gen"
 )
 
 const kitEndpointPackage = "github.com/go-kit/kit/endpoint"
 const kitHttpPackage = "github.com/go-kit/kit/transport/http"
-const localEndpointPackage = "github.com/d39b/kit/endpoint"
-const localHttpPackage = "github.com/d39b/kit/transport/http"
+const localEndpointPackage = "github.com/dkinzler/kit/endpoint"
+const localHttpPackage = "github.com/dkinzler/kit/transport/http"
 const gorillaMuxPackage = "github.com/gorilla/mux"
 
 type KitGenerator struct {

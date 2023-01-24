@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/d39b/kit/codegen/gen"
-	"github.com/d39b/kit/codegen/parse"
+	"github.com/dkinzler/kit/codegen/gen"
+	"github.com/dkinzler/kit/codegen/parse"
 
 	"github.com/dave/jennifer/jen"
 )

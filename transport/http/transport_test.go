@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/d39b/kit/endpoint"
-	"github.com/d39b/kit/errors"
+	"github.com/dkinzler/kit/endpoint"
+	"github.com/dkinzler/kit/errors"
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"

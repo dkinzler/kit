@@ -5,11 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/d39b/kit/codegen/annotations"
-	"github.com/d39b/kit/codegen/gen"
-	"github.com/d39b/kit/codegen/internal/kit"
-	"github.com/d39b/kit/codegen/internal/mock"
-	"github.com/d39b/kit/codegen/parse"
+	"github.com/dkinzler/kit/codegen/annotations"
+	"github.com/dkinzler/kit/codegen/gen"
+	"github.com/dkinzler/kit/codegen/internal/kit"
+	"github.com/dkinzler/kit/codegen/internal/mock"
+	"github.com/dkinzler/kit/codegen/parse"
 
 	"github.com/dave/jennifer/jen"
 )

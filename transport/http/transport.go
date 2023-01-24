@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/d39b/kit/endpoint"
-	"github.com/d39b/kit/errors"
+	"github.com/dkinzler/kit/endpoint"
+	"github.com/dkinzler/kit/errors"
 
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/go-kit/log"
@@ -96,7 +96,7 @@ func DecodeQueryParameters(r *http.Request, v interface{}) error {
 }
 
 // A generic response encoder function for Go kit (github.com/go-kit/kit).
-// Use this function only if the response value returned by the endpoint implements the Responder interface from package "github.com/d39b/kit/endpoint".
+// Use this function only if the response value returned by the endpoint implements the Responder interface from package "github.com/dkinzler/kit/endpoint".
 func MakeGenericJSONEncodeFunc(status int) kithttp.EncodeResponseFunc {
 	return func(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 		resp, ok := response.(endpoint.Responder)
@@ -117,7 +117,7 @@ func MakeGenericJSONEncodeFunc(status int) kithttp.EncodeResponseFunc {
 }
 
 // Determines an appropriate http response code for the given error.
-// If the error is of type Error from package "github.com/d39b/kit/errors", the response code is based on the error code of the error.
+// If the error is of type Error from package "github.com/dkinzler/kit/errors", the response code is based on the error code of the error.
 // Otherwise http.StatusInternalServerError is returned.
 func ErrToCode(err error) int {
 	if e, ok := err.(errors.Error); ok {
@@ -140,7 +140,7 @@ func ErrToCode(err error) int {
 }
 
 // Sends an appropriate http status code and response body based on the error.
-// If the error is of type Error from package "github.com/d39b/kit/errors" and contains a public error code or message,
+// If the error is of type Error from package "github.com/dkinzler/kit/errors" and contains a public error code or message,
 // that information will be encoded as json and sent in the response body.
 //
 // The json body has the following format:

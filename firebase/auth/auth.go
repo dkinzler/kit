@@ -4,7 +4,7 @@ package auth
 import (
 	"context"
 
-	"github.com/d39b/kit/errors"
+	"github.com/dkinzler/kit/errors"
 
 	"firebase.google.com/go/v4/auth"
 )

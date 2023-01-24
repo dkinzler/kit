@@ -1,4 +1,4 @@
-module github.com/d39b/kit
+module github.com/dkinzler/kit
 
 go 1.19
 

@@ -11,7 +11,7 @@ An annotation has the format @Name{"abc":"xyz"} where:
 
 Run the generator with:
 
-	go run github.com/d39b/kit/codegen@latest --inputDir xyz
+	go run github.com/dkinzler/kit/codegen@latest --inputDir xyz
 
 This will generate code for any annotated interfaces found within directory xyz or (recursively) any subdirectories.
 For the code generator to work, directory xyz must be part of a go module, i.e. xyz or one of its ancestor directories must contain a go.mod file.
@@ -99,7 +99,7 @@ For Go kit code generation to work, the following requirements should be met by 
 
 [Go kit]: https://github.com/go-kit/kit
 [Testify Mock]: https://github.com/stretchr/testify
-[example project]: https://github.com/d39b/kit/tree/main/codegen/example
+[example project]: https://github.com/dkinzler/kit/tree/main/codegen/example
 */
 package main
 

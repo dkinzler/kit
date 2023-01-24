@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/d39b/kit/codegen/annotations"
-	"github.com/d39b/kit/codegen/gen"
-	"github.com/d39b/kit/codegen/parse"
+	"github.com/dkinzler/kit/codegen/annotations"
+	"github.com/dkinzler/kit/codegen/gen"
+	"github.com/dkinzler/kit/codegen/parse"
 )
 
 // KitGenSpecification defines what the code generator should generate.

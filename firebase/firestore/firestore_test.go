@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/d39b/kit/errors"
-	"github.com/d39b/kit/firebase"
-	"github.com/d39b/kit/firebase/emulator"
+	"github.com/dkinzler/kit/errors"
+	"github.com/dkinzler/kit/firebase"
+	"github.com/dkinzler/kit/firebase/emulator"
 
 	"cloud.google.com/go/firestore"
 	"github.com/stretchr/testify/assert"

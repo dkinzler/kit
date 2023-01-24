@@ -15,7 +15,7 @@ import (
 	p "path"
 	"time"
 
-	"github.com/d39b/kit/firebase"
+	"github.com/dkinzler/kit/firebase"
 
 	"firebase.google.com/go/v4/auth"
 )

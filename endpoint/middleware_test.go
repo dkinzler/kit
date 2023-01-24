@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/d39b/kit/errors"
+	"github.com/dkinzler/kit/errors"
 
 	"github.com/go-kit/kit/endpoint"
 	"github.com/stretchr/testify/assert"

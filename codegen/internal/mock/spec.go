@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/d39b/kit/codegen/annotations"
-	"github.com/d39b/kit/codegen/parse"
+	"github.com/dkinzler/kit/codegen/annotations"
+	"github.com/dkinzler/kit/codegen/parse"
 )
 
 // GenSpecification defines the input data and configuration for MockGenerator.

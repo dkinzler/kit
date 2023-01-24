@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/d39b/kit/errors"
+	"github.com/dkinzler/kit/errors"
 
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/metrics"

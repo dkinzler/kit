@@ -1,6 +1,6 @@
 github.com/VividCortex/gohistogram v1.0.0 h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrdtl/UvroE=
-github.com/d39b/kit v0.2.1 h1:d3vGmEHiV4Jopuo7M750Gx1mVb+0pC0YrNtTfFb3ANg=
-github.com/d39b/kit v0.2.1/go.mod h1:+8Z35VuLtr9U5zl8+RZ9Rw+buTHyqMXAA+dowP3Z2yQ=
+github.com/dkinzler/kit v0.2.1 h1:d3vGmEHiV4Jopuo7M750Gx1mVb+0pC0YrNtTfFb3ANg=
+github.com/dkinzler/kit v0.2.1/go.mod h1:+8Z35VuLtr9U5zl8+RZ9Rw+buTHyqMXAA+dowP3Z2yQ=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

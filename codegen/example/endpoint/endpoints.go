@@ -4,7 +4,8 @@ package endpoint
 import (
 	"context"
 	example "example/codegen/example"
-	e "github.com/d39b/kit/endpoint"
+
+	e "github.com/dkinzler/kit/endpoint"
 	endpoint "github.com/go-kit/kit/endpoint"
 )
 

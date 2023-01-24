@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/d39b/kit/codegen/parse"
+	"github.com/dkinzler/kit/codegen/parse"
 )
 
 // An annotation on an interface.

@@ -5,10 +5,11 @@ import (
 	"context"
 	endpoint "example/codegen/endpoint"
 	example "example/codegen/example"
-	t "github.com/d39b/kit/transport/http"
+	"net/http"
+
+	t "github.com/dkinzler/kit/transport/http"
 	kithttp "github.com/go-kit/kit/transport/http"
 	mux "github.com/gorilla/mux"
-	"net/http"
 )
 
 func decodeHttpMethod1Request(ctx context.Context, r *http.Request) (interface{}, error) {

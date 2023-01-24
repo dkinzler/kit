@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"cloud.google.com/go/firestore"
-	"github.com/d39b/kit/errors"
+	"github.com/dkinzler/kit/errors"
 )
 
 // An example of how to integrate optimistic concurrency/transactions with application services and data stores based on firestore.

@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 
-	"github.com/d39b/kit/errors"
+	"github.com/dkinzler/kit/errors"
 
 	kitjwt "github.com/go-kit/kit/auth/jwt"
 	"github.com/go-kit/kit/endpoint"

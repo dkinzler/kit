@@ -3,7 +3,7 @@ module example/codegen
 go 1.19
 
 require (
-	github.com/d39b/kit v0.2.1
+	github.com/dkinzler/kit v0.2.1
 	github.com/go-kit/kit v0.12.0
 	github.com/gorilla/mux v1.8.0
 	github.com/stretchr/testify v1.8.0

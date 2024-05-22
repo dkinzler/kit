@@ -1,5 +1,6 @@
 // Package errors provides a structured error implementation that makes it easy
-// to set and inspect error attributes like an error code, message or stack trace.
+// to set and inspect attributes like an error code, message or stack trace.
+// Using an error wrapper like this throughout an entire application can streamline error handling, logging and debugging.
 //
 // Errors can be build incrementally by chaining:
 //
@@ -21,7 +22,7 @@ import (
 
 // Structured error that can contain additional context about an error, e.g. the component
 // the error originated in, a strack trace or an internal error message.
-// All fields are optional, although it makes sense to at least provide the origin and a general error code.
+// All fields are optional, although it usually makes sense to at least provide the origin and a general error code.
 type Error struct {
 	Origin string
 	// Wrap another error with additional context.
@@ -34,12 +35,12 @@ type Error struct {
 	// Code or message that is safe to be provided to outside systems/clients/users,
 	// e.g. an http handler might return these in the response body if a request fails.
 	// Packages can use this to provide more specific error codes, e.g. 5 = "invalid username" or 6 = "password not strong enough".
-	// Note that a code should not be 0 since a zero value will be interpreted as no error code set.
+	// Note that a code should not be 0 since a zero value will be interpreted by this package as no error code set.
 	PublicCode    int
 	PublicMessage string
 
 	// Code or message for internal use only. These could e.g. be written to application logs.
-	// Note that a code should not be 0 since a zero value will be interpreted as no error code set.
+	// Note that a code should not be 0 since a zero value will be interpreted by this package as no error code set.
 	InternalCode    int
 	InternalMessage string
 

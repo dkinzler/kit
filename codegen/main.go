@@ -1,13 +1,13 @@
 /*
 Package codegen provides a code generator that can generate:
-  - Mock implementation of an interface using [Testify Mock] (package github.com/stretchr/testify/mock)
-  - [Go kit] (package github.com/go-kit/kit) endpoints for an interface
+  - Mock implementation of an interface using [Testify Mock]
+  - [Go kit] endpoints for an interface
   - [Go kit] http handlers for an interface
 
 The code generator is configured by providing annotations in the comments of an interface and its methods.
 An annotation has the format @Name{"abc":"xyz"} where:
   - Name denotes the type of code to generate, either Mock or Kit
-  - name is followed by a JSON object which can be split across multiple comment lines
+  - Name is followed by a JSON object which can be split across multiple comment lines
 
 Run the generator with:
 

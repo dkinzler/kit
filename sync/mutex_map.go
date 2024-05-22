@@ -19,9 +19,9 @@ import (
 //	// prefer to call Unlock() with defer right after locking, to make sure the lock gets unlocked eventually
 //	defer l.Unlock()
 //
-// Careful: nested locks, i.e. trying to obtain a lock for key x while already holding the lock for key y can lead to deadlocks.
+// Careful: nested locks, i.e. trying to obtain a lock for key x while already holding the lock for key y, can lead to deadlocks.
 //
-// Implementation copied from answer https://stackoverflow.com/a/62562831 to https://stackoverflow.com/questions/40931373/how-to-gc-a-map-of-mutexes-in-go .
+// Implementation slightly adapted from answer https://stackoverflow.com/a/62562831 to https://stackoverflow.com/questions/40931373/how-to-gc-a-map-of-mutexes-in-go .
 type MutexMap struct {
 	lock      sync.Mutex
 	keyToLock map[string]*keyMutex

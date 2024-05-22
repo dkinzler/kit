@@ -23,7 +23,7 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: '16'
-    - run: npm install -g firebase-tools
+    - run: npm install -g firebase-tools@9.16.0
     - run: >
           firebase -P "demo-project" -c "./firebase/.firebase.json" emulators:exec
           "go test -v -count=1 ./firebase/emulator &&
